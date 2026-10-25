@@ -3,7 +3,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no,viewport-fit=cover">
 <meta name="apple-mobile-web-app-capable" content="yes">
-<title>My Gems · V5.1</title>
+<title>My Gems · V5.2</title>
 <style>
 *{box-sizing:border-box;-webkit-tap-highlight-color:transparent;user-select:none;-webkit-user-select:none}
 html,body{margin:0;height:100%;background:#fffafc;font-family:-apple-system,BlinkMacSystemFont,sans-serif;color:#6a5765;overflow:hidden}
@@ -49,6 +49,7 @@ button{font:inherit}
 #done video{max-width:80vw;max-height:34vh;display:none;border-radius:16px}
 #toast{position:fixed;left:50%;top:calc(env(safe-area-inset-top) + 64px);transform:translateX(-50%);background:#fff;border:1px solid #ecdde8;color:#9f87a0;padding:8px 14px;border-radius:999px;font-size:13px;box-shadow:0 6px 16px rgba(185,110,152,.1);z-index:30;opacity:0;transition:opacity .3s;pointer-events:none}
 </style></head><body>
+<script>window.onerror=function(m,s,l){alert('오류: '+m+' (줄 '+l+')');};</script>
 <div id="home"><div class="hero"><h1>My Gems</h1><div class="sub">jewel atelier</div></div><div class="grid" id="list"></div></div>
 <div id="game">
  <div id="top"><button id="bHome">🏠</button><button id="bFind">찾기</button>
@@ -75,7 +76,7 @@ const toHex=a=>'#'+a.map(v=>Math.max(0,Math.min(255,Math.round(v))).toString(16)
 const mix=(a,b,t)=>{const A=hx(a),B=hx(b);return toHex(A.map((v,i)=>v+(B[i]-v)*t))};
 const lum=h=>{const a=hx(h);return(.299*a[0]+.587*a[1]+.114*a[2])/255};
 const clamp=(v,a,b)=>Math.max(a,Math.min(b,v));
-function toast(t){const e=$('toast');e.textContent=t;e.style.opacity=1;clearTimeout(e._t);e._t=setTimeout(()=>e.style.opacity=0,1600);}
+function toast(t,ms){const e=$('toast');e.textContent=t;e.style.opacity=1;clearTimeout(e._t);e._t=setTimeout(()=>e.style.opacity=0,ms||1600);}
 
 /* ---------- 도형 도구 ---------- */
 function resample(poly,N){const L=[0];let tot=0;
@@ -115,10 +116,14 @@ function sprite(shape,cn){const key=shape+'|'+cn;if(SPR[key])return SPR[key];
  else{const c=COL[cn]||'#ccc',g=x.createRadialGradient(-.3,-.35,.05,0,0,1.1);g.addColorStop(0,'#fff');g.addColorStop(.35,c);g.addColorStop(1,mix(c,'#000',.25));x.fillStyle=g;x.fillRect(-1.6,-1.6,3.2,3.2);}
  x.restore();return SPR[key]=cv;}
 function loadAtlas(){
- const names=['v4.txt','MyGems_V4_전체코드.txt','MyGems_V4_%25EC%25A0%2584%25EC%25B2%25B4%25EC%25BD%2594%25EB%2593%259C.txt'];
- const tryN=k=>{if(k>=names.length){toast('보석 이미지 파일(v4.txt)을 못 찾았어요');return;}
-  fetch(names[k],{cache:'force-cache'}).then(r=>{if(!r.ok)throw 0;return r.text()}).then(t=>{const m=t.match(/GEM_ATLAS\s*=\s*'([^']+)'/);if(!m)throw 0;
-   atlas.onload=()=>{atlasOK=true;SPR={};if(active){buildPal();dirty=true;}else showHome();};atlas.src=m[1];}).catch(()=>tryN(k+1));};
+ const names=['v4.txt','MyGems_V4_전체코드.txt'];let why=[];
+ const tryN=k=>{if(k>=names.length){alert('보석 이미지 파일을 못 찾았어요\n'+why.join('\n'));return;}
+  fetch(names[k],{cache:'no-cache'}).then(r=>{if(!r.ok){why.push(names[k]+' → '+r.status);throw 0;}return r.text()})
+  .then(t=>{const m=t.match(/GEM_ATLAS\s*=\s*'([^']+)'/);if(!m){why.push(names[k]+' → 보석 데이터 없음');throw 0;}
+   atlas.onload=()=>{atlasOK=true;SPR={};if(active){buildPal();dirty=true;}else showHome();};
+   atlas.onerror=()=>alert('보석 이미지를 읽지 못했어요 (파일이 잘렸을 수 있어요)');
+   atlas.src=m[1];})
+  .catch(()=>tryN(k+1));};
  tryN(0);}
 
 /* ---------- 도안 → 보석 좌표 (획/윤곽 따라 배치) ---------- */
@@ -206,15 +211,15 @@ function render(ctx,D,L,o){
   const pp=P[g[4]],m=g[2]*sc*dpr,X=(ox+g[0]*sc)*dpr,Y=(oy+g[1]*sc)*dpr,a=pp.shape==='round'?0:g[3],c=Math.cos(a),sn=Math.sin(a),path=SHP[pp.shape];
   ctx.setTransform(m*c,m*sn,-m*sn,m*c,X,Y);
   if(s){ctx.fillStyle=pp.tint;ctx.fill(path);ctx.lineWidth=1.7*dpr/m;ctx.strokeStyle=pp.edge;ctx.stroke(path);}
-  else{ctx.fillStyle='rgba(160,140,155,.10)';ctx.fill(path);ctx.lineWidth=dpr/m;ctx.strokeStyle='rgba(150,128,145,.30)';ctx.stroke(path);}
+  else{ctx.fillStyle='rgba(150,126,144,.24)';ctx.fill(path);ctx.lineWidth=1.2*dpr/m;ctx.strokeStyle='rgba(130,105,125,.55)';ctx.stroke(path);}
   if(!o.nonum&&g[2]*sc>=6.5)nums.push(i);}}
  for(let i=0;i<G.length;i++){if(!isF(i))continue;const g=G[i];if(!vis(g))continue;drawGemAt(ctx,g,P,sc,ox,oy,dpr);}
  if(nums.length){ctx.setTransform(dpr,0,0,dpr,0,0);ctx.textAlign='center';ctx.textBaseline='middle';let lf=0;
   for(const i of nums){const g=G[i],fs=Math.min(15,Math.round(g[2]*sc*.9));if(fs!==lf){ctx.font='600 '+fs+'px -apple-system,sans-serif';lf=fs;}
-   ctx.fillStyle=g[4]===sel?P[g[4]].edge:'rgba(140,118,134,.55)';ctx.fillText(g[4]+1,ox+g[0]*sc,oy+g[1]*sc+.5);}}
+   ctx.fillStyle=g[4]===sel?P[g[4]].edge:'rgba(120,98,114,.7)';ctx.fillText(g[4]+1,ox+g[0]*sc,oy+g[1]*sc+.5);}}
  ctx.setTransform(1,0,0,1,0,0);}
 function getLayout(D){const k='mg5-L-'+D.id+'-'+D.ver;let L=null;try{L=JSON.parse(localStorage.getItem(k))}catch(e){}
- if(!L||!L.gems){L=buildLayout(D);try{localStorage.setItem(k,JSON.stringify(L))}catch(e){}}
+ if(!L||!L.gems||!L.gems.length){L=buildLayout(D);try{localStorage.setItem(k,JSON.stringify(L))}catch(e){}}
  L.pal.forEach(p=>{const c=COL[p.color];p.tint=mix(c,'#ffffff',.6);p.edge=lum(c)>.75?mix(c,'#6e5a70',.6):mix(c,'#3a2030',.2)});return L;}
 const loadProg=id=>{try{return JSON.parse(localStorage.getItem('mg5-P-'+id))||[]}catch(e){return[]}};
 
@@ -235,7 +240,8 @@ function openDesign(d){D=d;L=getLayout(D);const G=L.gems;F=new Uint8Array(G.leng
  loadProg(D.id).forEach(i=>{if(i<G.length&&!F[i]){F[i]=1;order.push(i);cnt[G[i][4]]++}});
  hw=Math.ceil(D.w/HC);hh=Math.ceil(D.h/HC);hit=Array.from({length:hw*hh},()=>[]);G.forEach((g,i)=>hit[Math.min(hh-1,Math.floor(g[1]/HC))*hw+Math.min(hw-1,Math.floor(g[0]/HC))].push(i));
  $('home').style.display='none';$('game').style.display='flex';active=true;
- buildPal();resize();fitView();const f=cnt.findIndex((c,n)=>c<tot[n]);select(f<0?0:f);updProg();}
+ buildPal();resize();fitView();const f=cnt.findIndex((c,n)=>c<tot[n]);select(f<0?0:f);updProg();
+ setTimeout(()=>{resize();fitView();},120);}
 function buildPal(){const pal=$('pal');pal.innerHTML='';chips=L.pal.map((p,n)=>{const d=document.createElement('div');d.className='pc';
  d.innerHTML='<div class="thumb"></div><div class="n">'+(n+1)+'</div><div class="left"></div><div class="mini"><i></i></div>';
  const th=document.createElement('canvas');th.width=th.height=76;th.getContext('2d').drawImage(sprite(p.shape,p.color),0,0,76,76);d.querySelector('.thumb').appendChild(th);
@@ -330,5 +336,5 @@ function showHome(){const list=$('list');list.innerHTML='';
    render(c.getContext('2d'),d,Ld,{sc:s,ox:(w-d.w*s)/2,oy:(h-d.h*s)/2,dpr:DPR});
    if(done)card.insertAdjacentHTML('beforeend','<div class="pct">'+Math.floor(done/Ld.gems.length*100)+'%</div>');});
   card.onclick=()=>openDesign(d);});}
-showHome();loadAtlas();
+setTimeout(()=>{showHome();loadAtlas();},80);
 </script></body></html>
