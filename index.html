@@ -336,5 +336,5 @@ function showHome(){const list=$('list');list.innerHTML='';
    render(c.getContext('2d'),d,Ld,{sc:s,ox:(w-d.w*s)/2,oy:(h-d.h*s)/2,dpr:DPR});
    if(done)card.insertAdjacentHTML('beforeend','<div class="pct">'+Math.floor(done/Ld.gems.length*100)+'%</div>');});
   card.onclick=()=>openDesign(d);});}
-setTimeout(()=>{showHome();loadAtlas();},80);
+const ds=document.createElement('script');ds.src='designs.js?v='+Date.now();ds.onload=ds.onerror=()=>{showHome();loadAtlas();};document.body.appendChild(ds);
 </script></body></html>
