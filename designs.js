@@ -232,11 +232,104 @@ add('c-wreath','성탄절','크리스마스 리스',[
  P('진주','round',()=>dots(arcP(300,310,118,PI*.12,PI*.88,70),15,5))
 ]);
 
+/* ======= V5.6: detailed curated beadwork, created from original jewel coordinates ======= */
+// Retire the rushed V5.5 templates from the gallery, keep progress in storage untouched.
+const retiredV55=new Set(['a-tiara','a-necklace','d-gown','f-slipper','m-anniv2','c-wreath','m-mom','m-dad']);
+for(let i=DESIGNS.length-1;i>=0;i--)if(retiredV55.has(DESIGNS[i].id))DESIGNS.splice(i,1);
+const JE=(x,y,r,a=0)=>[+x.toFixed(2),+y.toFixed(2),r,a];
+const Jline=(x0,y0,x1,y1,step,r)=>dots([[x0,y0],[x1,y1]],step,r);
+function Jell(cx,cy,rx,ry,n,r,phase=0){const p=[];for(let i=0;i<n;i++){const a=i/n*2*PI+phase;p.push(JE(cx+Math.cos(a)*rx,cy+Math.sin(a)*ry,r,a+PI/2));}return p;}
+function Jarc(cx,cy,rx,ry,a0,a1,n,r){const p=[];for(let i=0;i<=n;i++){const a=a0+(a1-a0)*i/n;p.push(JE(cx+Math.cos(a)*rx,cy+Math.sin(a)*ry,r,a+PI/2));}return p;}
+function Jfill(cx,cy,rx,ry,stepX,stepY,r,omit){const p=[];let k=0;for(let y=cy-ry+stepY/2;y<=cy+ry-stepY/2;y+=stepY){const rr=1-((y-cy)/ry)**2;if(rr<=0)continue;const mx=rx*Math.sqrt(rr);let j=0;for(let x=cx-mx+stepX/2;x<=cx+mx-stepX/2;x+=stepX){if(omit&&omit(x,y))continue;p.push(JE(x,y,r*(j%6===0?1.05:1),0));j++;}k++;}return p;}
+function Jrect(x0,y0,x1,y1,dx,dy,r,omit){const p=[];for(let y=y0;y<=y1;y+=dy){for(let x=x0;x<=x1;x+=dx){if(!omit||!omit(x,y))p.push(JE(x,y,r));}}return p;}
+function Jtri(cx,apex,baseY,half,dy,r){const p=[];for(let y=apex;y<=baseY;y+=dy){const w=half*(y-apex)/(baseY-apex);for(let x=cx-w+6;x<=cx+w-5;x+=2*r+2.5){p.push(JE(x,y,r));}}return p;}
+function Jflower(cx,cy,scale,petals=6){return Array.from({length:petals},(_,i)=>{const a=2*PI*i/petals-PI/2;return JE(cx+Math.cos(a)*scale*.57,cy+Math.sin(a)*scale*.57,scale*.26,a+PI/2);});}
+function Jheartline(cx,cy,s,n,r){const p=[];for(let i=0;i<n;i++){const t=2*PI*i/n,X=16*Math.sin(t)**3,Y=13*Math.cos(t)-5*Math.cos(2*t)-2*Math.cos(3*t)-Math.cos(4*t);p.push(JE(cx+X*s/17,cy-Y*s/17,r));}return p;}
+function Jspiral(cx,cy,s,flip=1){const p=[];for(let i=0;i<56;i++){const t=i*.205,r=6+t*s,ang=t*flip; p.push(JE(cx+Math.cos(ang)*r,cy+Math.sin(ang)*r,2.7));}return p;}
+function JP(color,shape,coords){return P(color,shape,()=>coords);}
+
+// Jeweled Castle: large ruby hearts, three tapered rooftops, aquamarine masonry,
+// snow-white pearl clouds and saturated floral garden. Built as actual gem coordinates.
+{
+ const skylines=Jtri(302,51,171,64,10,5.2), roofsSide=[[132,228],[468,228]].map(([x,y])=>Jtri(x,y,344,83,12,5.9)).flat();
+ const upperWindow=(x,y)=>x>280&&x<327&&y>271&&y<325;
+ const midWindows=(x,y)=>((x>115&&x<149)||(x>447&&x<481))&&y>413&&y<461;
+ const cloud=(cx,cy)=>[
+  ...Jfill(cx-26,cy+20,52,24,15,14,6),...Jfill(cx+20,cy+12,35,36,14,15,6),
+  ...Jfill(cx+55,cy+27,52,21,15,14,6)];
+ const botFlowers=[];for(const [x,y,s] of [[96,546,34],[170,558,23],[236,558,17],[352,561,25],[433,548,30],[507,559,28]])botFlowers.push(...Jflower(x,y,s,7));
+ add('f-castle-v2','동화','루비 하트 궁전',[
+ JP('빨강','heart',[[302,26,21],[132,206,16],[468,206,16],[301,219,13],[302,394,18],[300,523,17]]),
+ JP('진한 하늘','emerald',[[132,425,16],[468,425,16],[300,470,19]]),
+ JP('아쿠아','round',[[302,110,17],[132,286,11],[468,286,11]]),
+ JP('연핑크','cushion',Jrect(87,364,187,517,14,14,5.5,midWindows)),
+ JP('연핑크','cushion',Jrect(413,364,513,517,14,14,5.5,midWindows)),
+ JP('연하늘','emerald',Jrect(259,181,345,392,13,14,5.6,upperWindow)),
+ JP('아쿠아','emerald',Jrect(193,449,405,526,12,13,5.6,(x,y)=>x>273&&x<329&&y>466)),
+ JP('골드','emerald',Jrect(273,171,331,219,12,11,5.1,(x,y)=>Math.abs(x-300)<17&&y>182&&y<212)),
+ JP('분홍','oval',skylines),JP('버터 옐로','oval',roofsSide),
+ JP('분홍','round',Jline(204,444,396,444,10,4.2)),
+ JP('골드','round',[...Jarc(300,490,42,53,PI*1.01,PI*1.99,32,4.1),...Jarc(300,490,32,43,PI*1.01,PI*1.99,28,3.5)]),
+ JP('진주','round',[...cloud(88,143),...cloud(405,146),...cloud(74,354),...cloud(470,347)]),
+ JP('파스텔 핑크','marquise',botFlowers),
+ JP('라벤더','marquise',[...Jflower(103,552,27),...Jflower(448,549,25)]),
+ JP('진초록','marquise',[[64,567,12,-.5],[131,576,12,.5],[187,584,10,-.6],[352,583,10,.7],[497,576,12,-.5],[534,558,12,.5]]),
+ JP('진주','round',[...Jline(78,527,78,537,8,3.5),...Jline(520,527,520,537,8,3.5),...Jline(218,543,380,543,11,4)]),
+ JP('골드','round',[...Jflower(55,63,18,8),...Jflower(545,82,18,8),...Jflower(55,456,15,8),...Jflower(548,456,17,8)]),
+ ]);
+}
+// Sapphire flacon: deep blue beaded drop, lavender shoulder scrolls, pearl filigree;
+// the large aquamarine gems anchor the design rather than being randomly sprinkled.
+{
+ const flaconOmit=(x,y)=>Math.abs(x-298)<30&&y>330&&y<392;
+ const body=Jfill(300,431,126,149,12,12,5.1,flaconOmit);
+ const emptyCenter=Jfill(300,432,37,44,14,14,5.0);
+ add('a-sapphire-flacon','악세사리','사파이어 향수병',[
+ JP('아쿠아','heart',[[300,92,24],[300,405,25]]),
+ JP('연하늘','cushion',[[300,268,20],[300,340,22],[260,291,14],[340,291,14],[300,176,15]]),
+ JP('남색','round',body),
+ JP('남색','round',Jfill(300,216,54,67,13,14,5.3)),
+ JP('진주','round',[...Jell(300,431,130,151,99,4.2),...Jell(300,218,63,74,47,3.9)]),
+ JP('자수정','marquise',[[244,204,13,-.8],[356,204,13,.8],[260,154,12,-.55],[340,154,12,.55],[300,140,14,0]]),
+ JP('진한 하늘','emerald',[[300,291,24,0],[222,296,12,-.22],[378,296,12,.22]]),
+ JP('연보라','oval',[...Jarc(300,295,92,64,PI*.83,PI*2.17,34,6.3),...Jarc(300,318,95,64,PI*.84,PI*2.16,32,5.9)]),
+ JP('진한 하늘','round',[...Jline(237,310,363,310,9.6,4.4),...Jline(244,331,356,331,10,4.3),...Jline(257,352,343,352,10,4.1)]),
+ JP('진주','round',emptyCenter),
+ JP('남색','round',[...Jspiral(143,283,4.5,1),...Jspiral(459,283,4.5,-1),...Jspiral(121,398,4,1),...Jspiral(479,398,4,-1)]),
+ JP('진주','round',[...Jell(101,87,40,29,28,4),...Jell(499,87,40,29,28,4),...Jell(91,526,40,29,28,4),...Jell(509,526,40,29,28,4)]),
+ JP('라벤더','marquise',[
+   [101,87,29,.2],[499,87,29,-.2],[91,526,27,.3],[509,526,27,-.3],
+   [57,59,17,-.8],[139,59,17,.8],[462,59,17,-.8],[543,59,17,.8],
+   [49,507,17,-.8],[129,507,17,.8],[466,505,17,-.8],[547,508,17,.8]]),
+ JP('남색','heart',[[244,86,14],[356,86,14]]),
+ JP('아쿠아','round',[...Jflower(80,225,26,6),...Jflower(522,225,26,6)]),
+ ]);
+}
+// Original heartwork, beaded ruby heart frame with gold word and ornate leaves.
+{
+ add('m-hearts-jewel','메세지','Forever & Always',[
+ JP('빨강','heart',[[300,110,32],[126,179,25],[474,179,25],[300,500,26]]),
+ JP('골드','marquise',[...Jflower(300,75,38,10),...Jflower(110,210,29,6),...Jflower(490,210,29,6)]),
+ JP('진주','round',[...Jheartline(300,300,225,184,4),...Jheartline(300,305,209,162,3.4)]),
+ JP('버건디','round',Jheartline(300,300,240,184,4.1)),
+ JP('골드','round',Jheartline(300,300,269,180,3.0)),
+ E('골드','round',2.0,4.8,x=>txt(x,'Forever',300,279,104,305,4.4)),
+ E('골드','round',2.0,4.8,x=>txt(x,'& Always',300,358,88,340,4)),
+ JP('빨강','heart',[[300,418,18]]),
+ JP('라벤더','marquise',[...Jflower(140,350,24,6),...Jflower(460,350,24,6)]),
+ JP('버건디','round',[...Jspiral(64,108,3.5,1),...Jspiral(536,108,3.5,-1),...Jspiral(67,497,3.5,-1),...Jspiral(533,497,3.5,1)]),
+ JP('진초록','marquise',[[135,378,13,-.7],[164,370,13,.7],[435,370,13,-.7],[466,380,13,.7]])
+ ]);
+}
+
+// Dark jewel card: one deliberate alternative to the cream background.
+const darkHeart=DESIGNS.find(d=>d.id==='m-hearts-jewel');if(darkHeart)darkHeart.bg='#1a111b';
+
 /* ---------- 갤러리: 카테고리 탭 ---------- */
 const st=document.createElement('style');
 st.textContent='.tabs{display:flex;gap:8px;overflow-x:auto;padding:6px 0}.tab{flex:none;padding:9px 16px;border-radius:999px;background:#fff;border:1px solid #ecdde8;font-size:14px;color:#7a6170}.tab.on{background:linear-gradient(180deg,#e9b0cb,#cf8db3);color:#fff;border-color:#d59abd}.card{aspect-ratio:1}';
 document.head.appendChild(st);
-let cat='전체',tok=0;const CATS=['전체','성탄절','메세지','악세사리','드레스','동화'];
+let cat='전체',tok=0;const CATS=['전체','성탄절','메세지','악세사리','동화'];
 showHome=function(){
  const home=$('home'),list=$('list');let tabs=$('tabs');
  if(!tabs){tabs=document.createElement('div');tabs.id='tabs';tabs.className='tabs';home.insertBefore(tabs,list);}
