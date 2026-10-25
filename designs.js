@@ -45,11 +45,12 @@ add('c-flakes','성탄절','눈송이',FC.map((c,ci)=>E(c[0],c[1],2.4,6,x=>FL.fo
 // 3. 큰 눈꽃
 const arm=k=>k*PI/3-PI/2;
 add('c-bigflake','성탄절','큰 눈꽃',[
- P('아쿠아','round',()=>[[300,300,20]]),
- P('진주','round',()=>[0,1,2,3,4,5].map(k=>{const a=arm(k)+PI/6;return[300+Math.cos(a)*34,300+Math.sin(a)*34,8];})),
- P('연하늘','marquise',()=>{const o=[];for(let k=0;k<6;k++){const a=arm(k);for(let R=40;R<=250;R+=26)o.push([300+Math.cos(a)*R,300+Math.sin(a)*R,11,a]);}return o;}),
- P('라벤더','pear',()=>{const o=[];for(let k=0;k<6;k++){const a=arm(k);[[66,12],[118,11],[170,10]].forEach(([R,r])=>{const bx=300+Math.cos(a)*R,by=300+Math.sin(a)*R;[a+.8,a-.8].forEach(t=>o.push([bx+Math.cos(t)*34,by+Math.sin(t)*34,r,t]));});}return o;}),
- P('아쿠아','marquise',()=>{const o=[];for(let k=0;k<6;k++){const a=arm(k)+PI/6;for(let R=70;R<=150;R+=24)o.push([300+Math.cos(a)*R,300+Math.sin(a)*R,8,a]);}return o;})
+ P('아쿠아','round',()=>[[300,300,26]]),
+ P('진주','round',()=>[0,1,2,3,4,5].flatMap(k=>{const a=arm(k)+PI/6;return[[300+Math.cos(a)*38,300+Math.sin(a)*38,9],[300+Math.cos(a)*62,300+Math.sin(a)*62,7.5]];})),
+ P('연하늘','marquise',()=>{const o=[];for(let k=0;k<6;k++){const a=arm(k);for(let R=44;R<=266;R+=22)o.push([300+Math.cos(a)*R,300+Math.sin(a)*R,13.5,a]);}return o;}),
+ P('라벤더','pear',()=>{const o=[];for(let k=0;k<6;k++){const a=arm(k);[[78,14],[132,12.8],[186,11.6],[238,10.2]].forEach(([R,r])=>{const bx=300+Math.cos(a)*R,by=300+Math.sin(a)*R;[a+.82,a-.82].forEach(t=>o.push([bx+Math.cos(t)*36,by+Math.sin(t)*36,r,t]));});}return o;}),
+ P('아쿠아','marquise',()=>{const o=[];for(let k=0;k<6;k++){const a=arm(k)+PI/6;for(let R=84;R<=190;R+=22)o.push([300+Math.cos(a)*R,300+Math.sin(a)*R,9.4,a]);}return o;}),
+ P('다이아','round',()=>{const o=[];for(let k=0;k<6;k++){const a=arm(k)+PI/6;for(let R=96;R<=210;R+=38)o.push([300+Math.cos(a)*R,300+Math.sin(a)*R,6.2]);}return o;})
 ]);
 
 // 4. 별 오너먼트
